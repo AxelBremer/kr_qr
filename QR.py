@@ -78,4 +78,75 @@ def next_vd(new_params):
     
     return possible
     
-print(next_vq(s.get_all_params()))
+#print(next_vq(s.get_all_params()))
+
+
+
+
+def successor_states(graph, stack, state, infd):
+    
+    params = state.get_all_params()
+    state_counter = state.id+1
+
+    new_state = State({'ID':0,'IQ':0,'VD':0,'VQ':0,'OD':0,'OQ':0}, 0)
+    new_state.params['ID'] = infd
+
+    successor_iqs = next_iq(params)
+    successor_vqs = next_vq(params)
+
+    for iq  in successor_iqs:
+        new_state.params['IQ'] = iq
+        for vq in successor_vqs:
+          
+            new_state.params['VQ'] = vq
+            new_state.params['OQ'] = vq
+
+            successor_vds = next_vd(new_state.params)
+
+            for vd in successor_vds:
+                new_state.params['VD'] = vd
+                new_state.params['OD'] = vd
+
+
+                if new_state == state:
+                    continue
+                else:
+                    if new_state not in graph[state]:
+                        if new_state in graph.keys():
+                            if state in graph[new_state]:
+                                continue
+                        new_state.id = state_counter
+                        graph[state] += [new_state]
+                        state_counter += 1
+                        stack.append(new_state)
+
+
+
+def add_successor_states(graph, searched, stack, infd):
+   
+    while len(stack) > 0:
+        state = stack.pop()
+        if state not in searched:
+            searched.append(state)
+            if state not in graph.keys():
+                graph[state] = []
+            successor_states(graph, stack, state, infd)
+
+
+def main():
+    state_graph = {}    
+    # Empty container
+    empty = State({'ID':0,'IQ':0,'VD':0,'VQ':0,'OD':0,'OQ':0}, state_counter)
+    stack = [empty]
+    searched = []
+    # Inflow increasing
+    infd = 1
+    add_successor_states(state_graph, searched, stack, infd)
+
+    for state in state_graph:
+        print("ID: ", state.id)
+
+        print("State: ", state.get_all_params())
+
+if __name__ == '__main__':
+    main()
