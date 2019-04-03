@@ -1,5 +1,7 @@
 from state import State
 from itertools import product
+from itertools import permutations
+from graphviz import Digraph
 
 state_counter = 0
 
@@ -132,10 +134,9 @@ def add_successor_states(graph, searched, stack, infd):
                 graph[state] = []
             successor_states(graph, stack, state, infd)
 
-def get_all_combinations():
+def get_states():
     s = {'ID':[-1,0,1],'IQ':[0,1],'VD':[-1,0,1],'VQ':[0,1,2],'OD':[-1,0,1],'OQ':[0,1,2]}
     combs = [dict(zip(s, v)) for v in product(*s.values())]
-    print(len(combs))
     toremove = []
     for s in combs:
         if s['VQ'] != s['OQ']:
@@ -165,9 +166,14 @@ def get_all_combinations():
 
     for s in toremove:
         combs.remove(s)
-    print(len(combs))
-    for s in combs:
-        print(s)
+
+    return combs
+
+def get_transitions(states):
+    numstates = len(states)
+    state_ids = list(range(0, numstates))
+    transitions = list(permutations(state_ids, 2))
+
 
 def main():
     # state_graph = {}    
@@ -183,7 +189,17 @@ def main():
     #     print("ID: ", state.id)
 
     #     print("State: ", state.get_all_params())
-    get_all_combinations()
+    states = get_states()
+    transitions = get_transitions(states)
 
 if __name__ == '__main__':
     main()
+    # dot = Digraph(comment='The Round Table')
+    # dot.node('A', 'King Arthur')
+    # dot.node('B', 'Sir Bedevere the Wise')
+    # dot.node('L', 'Sir Lancelot the Brave')
+
+    # dot.edges(['AB', 'AL'])
+    # dot.edge('B', 'L', constraint='false')
+    # print(dot.source)
+    # dot.render('test-output/round-table')
