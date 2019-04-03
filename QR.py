@@ -186,11 +186,14 @@ def plausible_transitions(states, transitions):
 		
 		if(next_state['IQ'] not in successor_iqs or next_state['VQ'] not in successor_vqs):
 			toremove.append(i)
+		'''
 		else:
 			successor_vds = next_vd(next_state)
+			print(successor_vds)
 			if(next_state['VD'] not in successor_vds):
+				print(next_state['VD'])
 				toremove.append(i)
-
+		'''
 	for s in toremove:
 		transitions.remove(s)
 	print(len(transitions))
