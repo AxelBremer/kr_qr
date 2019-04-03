@@ -1,4 +1,5 @@
 from state import State
+from itertools import product
 
 state_counter = 0
 
@@ -123,7 +124,6 @@ def successor_states(graph, stack, state, infd):
 
 
 def add_successor_states(graph, searched, stack, infd):
-   
     while len(stack) > 0:
         state = stack.pop()
         if state not in searched:
@@ -132,21 +132,47 @@ def add_successor_states(graph, searched, stack, infd):
                 graph[state] = []
             successor_states(graph, stack, state, infd)
 
+def get_all_combinations():
+    s = {'ID':[-1,0,1],'IQ':[0,1],'VD':[-1,0,1],'VQ':[0,1,2],'OD':[-1,0,1],'OQ':[0,1,2]}
+    combs = [dict(zip(s, v)) for v in product(*s.values())]
+    print(len(combs))
+    toremove = []
+    for s in combs:
+        if s['VQ'] != s['OQ']:
+            if s not in toremove:
+                toremove.append(s)
+        if s['VD'] != s['OD']:
+            if s not in toremove:
+                toremove.append(s)
+        if s['IQ'] == 0 and s['ID'] != 0:
+            if s not in toremove:
+                toremove.append(s)
+        if s['VQ'] == 0 and s['VD'] != 0:
+            if s not in toremove:
+                toremove.append(s)
+        if s['OQ'] == 0 and s['OD'] != 0:
+            if s not in toremove:
+                toremove.append(s)
+    for s in toremove:
+        combs.remove(s)
+    for s in combs:
+        print(s)
 
 def main():
-    state_graph = {}    
-    # Empty container
-    empty = State({'ID':0,'IQ':0,'VD':0,'VQ':0,'OD':0,'OQ':0}, state_counter)
-    stack = [empty]
-    searched = []
-    # Inflow increasing
-    infd = 1
-    add_successor_states(state_graph, searched, stack, infd)
+    # state_graph = {}    
+    # # Empty container
+    # empty = State({'ID':0,'IQ':0,'VD':0,'VQ':0,'OD':0,'OQ':0}, state_counter)
+    # stack = [empty]
+    # searched = []
+    # # Inflow increasing
+    # infd = 1
+    # add_successor_states(state_graph, searched, stack, infd)
 
-    for state in state_graph:
-        print("ID: ", state.id)
+    # for state in state_graph:
+    #     print("ID: ", state.id)
 
-        print("State: ", state.get_all_params())
+    #     print("State: ", state.get_all_params())
+    get_all_combinations()
 
 if __name__ == '__main__':
     main()
