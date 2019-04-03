@@ -173,6 +173,28 @@ def get_transitions(states):
     numstates = len(states)
     state_ids = list(range(0, numstates))
     transitions = list(permutations(state_ids, 2))
+    return transitions
+
+def plausible_transitions(states, transitions):
+	toremove = []
+
+	for i in transitions:
+		prev_state = states[i[0]]
+		successor_iqs = next_iq(prev_state)
+		successor_vqs = next_vq(prev_state)
+		next_state = states[i[1]]
+		
+		if(next_state['IQ'] not in successor_iqs or next_state['VQ'] not in successor_vqs):
+			toremove.append(i)
+		else:
+			successor_vds = next_vd(next_state)
+			if(next_state['VD'] not in successor_vds):
+				toremove.append(i)
+
+	for s in toremove:
+		transitions.remove(s)
+	print(len(transitions))
+	return transitions
 
 
 def main():
@@ -191,6 +213,14 @@ def main():
     #     print("State: ", state.get_all_params())
     states = get_states()
     transitions = get_transitions(states)
+    possible_transitions = plausible_transitions(states, transitions)
+    for i in possible_transitions:
+        print(i)
+        prev_state = states[i[0]]
+        next_state = states[i[1]]
+        print("PREV: ", prev_state, "NEXT: ", next_state)
+
+
 
 if __name__ == '__main__':
     main()
