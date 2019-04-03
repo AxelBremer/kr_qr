@@ -156,6 +156,13 @@ def get_all_combinations():
         if s['IQ'] == 0 and s['VD'] == 1:
             if s not in toremove:
                 toremove.append(s)
+        if s['IQ'] == 0 and s['OQ'] > 0 and s['VD'] != -1:
+            if s not in toremove:
+                toremove.append(s)
+        if s['IQ'] == 1 and s['OQ'] == 0 and s['VD'] != 1:
+            if s not in toremove:
+                toremove.append(s)
+
     for s in toremove:
         combs.remove(s)
     print(len(combs))
