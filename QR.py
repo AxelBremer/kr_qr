@@ -196,6 +196,22 @@ def plausible_transitions(states, transitions):
 	print(len(transitions))
 	return transitions
 
+def state_to_string(s):
+    string = "\nInflow: (" + str(s['ID']) + ", " + str(s['IQ']) + ")\n"
+    string += "Volume: (" + str(s['VD']) + ", " + str(s['VQ']) + ")\n"
+    string += "Outflow: (" + str(s['OD']) + ", " + str(s['OQ']) + ")\n"
+    return string
+
+def create_graph(states, transitions):
+    dot = Digraph(comment='Container')
+    for i,s in enumerate(states):
+        dot.node(str(i), state_to_string(s))
+    
+    for t in transitions:
+        dot.edge(str(t[0]), str(t[1]))
+    
+    dot.render('test-output/container')
+    return 
 
 def main():
     # state_graph = {}    
@@ -220,7 +236,7 @@ def main():
         next_state = states[i[1]]
         print("PREV: ", prev_state, "NEXT: ", next_state)
 
-
+    create_graph(states, possible_transitions)
 
 if __name__ == '__main__':
     main()
