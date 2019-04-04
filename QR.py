@@ -199,6 +199,9 @@ def plausible_transitions(states, transitions):
 	print(len(transitions))
 	return transitions
 
+def epsilon_ordering(states, transitions):
+    return transitions
+
 def state_to_string(s):
     string = "\nInflow: (" + str(s['ID']) + ", " + str(s['IQ']) + ")\n"
     string += "Volume: (" + str(s['VD']) + ", " + str(s['VQ']) + ")\n"
@@ -217,38 +220,17 @@ def create_graph(states, transitions):
     return 
 
 def main():
-    # state_graph = {}    
-    # # Empty container
-    # empty = State({'ID':0,'IQ':0,'VD':0,'VQ':0,'OD':0,'OQ':0}, state_counter)
-    # stack = [empty]
-    # searched = []
-    # # Inflow increasing
-    # infd = 1
-    # add_successor_states(state_graph, searched, stack, infd)
-
-    # for state in state_graph:
-    #     print("ID: ", state.id)
-
-    #     print("State: ", state.get_all_params())
     states = get_states()
     transitions = get_transitions(states)
     possible_transitions = plausible_transitions(states, transitions)
-    for i in possible_transitions:
-        print(i)
-        prev_state = states[i[0]]
-        next_state = states[i[1]]
-        print("PREV: ", prev_state, "NEXT: ", next_state)
+    epsilon_transitions = epsilon_ordering(states, transitions)
+    # for i in possible_transitions:
+    #     print(i)
+    #     prev_state = states[i[0]]
+    #     next_state = states[i[1]]
+    #     print("PREV: ", prev_state, "NEXT: ", next_state)
 
     create_graph(states, possible_transitions)
 
 if __name__ == '__main__':
     main()
-    # dot = Digraph(comment='The Round Table')
-    # dot.node('A', 'King Arthur')
-    # dot.node('B', 'Sir Bedevere the Wise')
-    # dot.node('L', 'Sir Lancelot the Brave')
-
-    # dot.edges(['AB', 'AL'])
-    # dot.edge('B', 'L', constraint='false')
-    # print(dot.source)
-    # dot.render('test-output/round-table')
