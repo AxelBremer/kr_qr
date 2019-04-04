@@ -1,10 +1,11 @@
 from itertools import product
 from itertools import permutations
 from graphviz import Digraph
+import os
+
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 state_counter = 0
-
-s = State({'ID':1,'IQ':0,'VD':1,'VQ':1,'OD':0,'OQ':0}, state_counter)
 
 def next_iq(params):
     """
@@ -139,27 +140,35 @@ def get_states():
     toremove = []
     for s in combs:
         if s['VQ'] != s['OQ']:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(1)
             if s not in toremove:
                 toremove.append(s)
         if s['VD'] != s['OD']:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(2)
             if s not in toremove:
                 toremove.append(s)
         if s['IQ'] == 0 and s['ID'] != 0:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(3)
             if s not in toremove:
                 toremove.append(s)
         if s['VQ'] == 0 and s['VD'] != 0:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(4)
             if s not in toremove:
                 toremove.append(s)
         if s['OQ'] == 0 and s['OD'] != 0:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(5)
             if s not in toremove:
                 toremove.append(s)
         if s['IQ'] == 0 and s['VD'] == 1:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(6)
             if s not in toremove:
                 toremove.append(s)
         if s['IQ'] == 0 and s['OQ'] > 0 and s['VD'] != -1:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(7)
             if s not in toremove:
                 toremove.append(s)
         if s['IQ'] == 1 and s['OQ'] == 0 and s['VD'] != 1:
+            if s == {'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0}: print(8)
             if s not in toremove:
                 toremove.append(s)
 
@@ -195,14 +204,41 @@ def plausible_transitions(states, transitions):
 		'''
 	for s in toremove:
 		transitions.remove(s)
-	print(len(transitions))
+	print("States left after plausible_transitions: ",len(transitions))
 	return transitions
 
+def is_instant(prev, new):
+    if prev != new:
+        if new == 1:
+            return 'instant'
+        else:
+            return 'not-instant'
+    return 'neither'
+
 def epsilon_ordering(states, transitions):
+    toremove = []
+
+    for t in transitions:
+        prev_state = states[t[0]]
+        next_state = states[t[1]]
+
+        i = is_instant(prev_state['IQ'], next_state['IQ'])
+        v = is_instant(prev_state['VQ'], next_state['VQ'])
+        o = is_instant(prev_state['OQ'], next_state['OQ'])
+
+        l = [i,v,o]
+        
+        if 'instant' in l and 'not-instant' in l:
+            toremove.append(t)
+
+    for t in toremove:
+        transitions.remove(t)
+    print("States left after epsilon_ordering: ",len(transitions))
     return transitions
 
-def state_to_string(s):
-    string = "\nInflow: (" + str(s['ID']) + ", " + str(s['IQ']) + ")\n"
+def state_to_string(i,s):
+    string = str(i)
+    string += "\nInflow: (" + str(s['ID']) + ", " + str(s['IQ']) + ")\n"
     string += "Volume: (" + str(s['VD']) + ", " + str(s['VQ']) + ")\n"
     string += "Outflow: (" + str(s['OD']) + ", " + str(s['OQ']) + ")\n"
     return string
@@ -210,7 +246,7 @@ def state_to_string(s):
 def create_graph(states, transitions):
     dot = Digraph(comment='Container')
     for i,s in enumerate(states):
-        dot.node(str(i), state_to_string(s))
+        dot.node(str(i), state_to_string(i,s))
     
     for t in transitions:
         dot.edge(str(t[0]), str(t[1]))
@@ -220,16 +256,13 @@ def create_graph(states, transitions):
 
 def main():
     states = get_states()
+    print('Number of states:',len(states))
+    print({'ID':1, 'IQ':0, 'VD':0, 'VQ':0, 'OD':0, 'OQ':0} in states)
     transitions = get_transitions(states)
     possible_transitions = plausible_transitions(states, transitions)
     epsilon_transitions = epsilon_ordering(states, transitions)
-    # for i in possible_transitions:
-    #     print(i)
-    #     prev_state = states[i[0]]
-    #     next_state = states[i[1]]
-    #     print("PREV: ", prev_state, "NEXT: ", next_state)
 
-    create_graph(states, possible_transitions)
+    create_graph(states, epsilon_transitions)
 
 if __name__ == '__main__':
     main()
