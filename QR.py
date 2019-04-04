@@ -1,4 +1,3 @@
-from state import State
 from itertools import product
 from itertools import permutations
 from graphviz import Digraph
