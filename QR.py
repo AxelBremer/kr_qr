@@ -266,11 +266,6 @@ def create_graph(states, transitions):
     for t in transitions:
         dot.edge(str(t[0]), str(t[1]))
 
-    # for i,s in enumerate(states):
-    #     if i != 17:
-    #         dot.edge(last, str(i))
-    #     last = str(i)
-
     
     dot.render('test-output/container')
     return 
