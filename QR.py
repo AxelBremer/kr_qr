@@ -14,24 +14,32 @@ def next_iq(params):
     """
     Returns all possible next values of iq given the current parameters.
     """
-    #possible = [0, 1]
     possible = []
     if params['ID'] == 0:
         possible.append(params['IQ'])
     if params['ID'] == 1:
         possible.append(1)
     if params['ID'] == -1:
-        possible.append(0)
+        if params['IQ'] == 1:
+            possible = possible + [0,1]
+        if params['IQ'] == 0:
+            possible = [0]
     
     return possible
 
 def next_id(params):
+    """
+    Returns all possible next values of id given the current parameters. The exogenous behaviour 
+    programmed in is opening the tap and only being able to close it once the container is full.
+    """
     possible = []
+    # If the container is full you can stop opening the tap.
     if params['ID'] == 1:
         if params['VQ'] == 2:
             possible += [0]
         else:
             possible += [1]
+    # Afther that the tap can be kept running or be closed more. But never get opened again.
     if params['ID'] == 0:
         possible = possible + [-1,0]
     if params['ID'] == -1:
@@ -203,14 +211,21 @@ def plausible_transitions(states, transitions):
         prev_state = states[i[0]]
         next_state = states[i[1]]
         
+        if i == (4,5):
+            print(prev_state)
+            print(next_state)
+
         if(next_state['IQ'] not in next_iq(prev_state)):
             if i not in toremove:
+                if i == (4,5): print(1)
                 toremove.append(i)
         if(next_state['VQ'] not in next_vq(prev_state)):
             if i not in toremove:
+                if i == (4,5): print(2)
                 toremove.append(i)
         if(next_state['ID'] not in next_id(prev_state)):
             if i not in toremove:
+                if i == (4,5): print(3)
                 toremove.append(i)
 
     for s in toremove:
