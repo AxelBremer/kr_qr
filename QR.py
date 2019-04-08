@@ -96,7 +96,7 @@ def next_vd(new_params):
 
     # Don't let the sink overflow
     if(new_params["VQ"] == 2):
-    	possible = [0]
+        possible = [0]
 
     
     # No inflow quantity
@@ -162,7 +162,7 @@ def get_states():
         if s['IQ'] == 1 and s['OQ'] == 0 and s['VD'] != 1:
             if s not in toremove:
                 toremove.append(s)
-		
+        
     for s in toremove:
         combs.remove(s)
 
@@ -201,8 +201,8 @@ def plausible_transitions(states, transitions):
 
         # Don't let the sink overflow
         if(prev_state['VQ'] == 2 and next_state['VD'] == 1):
-        	if i not in toremove:
-        		toremove.append(i)
+            if i not in toremove:
+                toremove.append(i)
 
     for s in toremove:
         transitions.remove(s)
@@ -241,7 +241,6 @@ def epsilon_ordering(states, transitions):
 
     for t in toremove:
         transitions.remove(t)
-    print("Transitions: ",len(transitions))
     return transitions
 
 def state_to_string(i,s):
@@ -267,140 +266,102 @@ def create_graph(states, transitions):
     dot.edge('r2', '17')
     
     for t in transitions:
-        print("State: ", states[t[0]], "transitions into ", states[t[1]])
-        interstates(states, t)
-        intrastates(states, t)
         dot.edge(str(t[0]), str(t[1]))
 
     
     dot.render('test-output/container')
     return 
 
-def intrastates(states, transition):
-    prev_state = states[transition[0]]
-    next_state = states[transition[1]]
+def intrastate(states, state_id):
+    state = states[state_id]
     D = ["ID", "VD", "OD"]
-    if(prev_state["ID"] != next_state["ID"] or prev_state["VD"] != next_state["VD"]):
-        print("The following intrastate changes happen: ")
-        for d in D:
-            if(d == "ID"):
-                if(next_state[d] == 1):
-                    print("-  Inflow derivative increases in this new state (i.e. open the tap more).")
-                if(next_state[d] == 0):
-                    print("-  Inflow derivative remains steady (i.e. the tap is not altered again).")
-                if(next_state[d] == -1): 
-                    print("-  Inflow derivative decreases in this new state (i.e. tap is closed more)")
-            if(d == "VD"):
-                if(next_state['IQ'] == 1 and (next_state["OQ"] == 1 or next_state["OQ"] == 2)):
-                    print("-  Inflow and outflow quantities in this new state are both positive so the volume derivative could be anything.")
-                    if (next_state[d] == 0):
-                        print("   In this case it is 0, thus the inflow quantity was equal to the outflow quantity. ")
-                    elif(next_state[d] == 1):
-                        print("   In this case it is 1, thus the inflow quantity was larger than the outflow quantity. ")
-                    elif(next_state[d] == -1):
-                        print("   In this case it is -1, thus the outflow quantity was larger than the inflow quantity. ")
-                if(next_state['IQ'] == 0 and (next_state["OQ"] == 1 or next_state["OQ"] == 2)):
-                    print("-  Inflow quantity is 0 while the outflow quantity is positive, thus the volume derivative becomes negative.")
-                if(next_state['IQ'] == 0 and next_state["OQ"] == 0):
-                    print("-  Inflow and outflow quantities are both 0, thus the volume derivative becomes 0 as well.")
-                if(next_state['IQ'] == 1 and next_state["OQ"] == 0):
-                    print("-  Inflow quantity is is positive while outflow is 0, thus the volume derivative becomes positive.")
-            if(d == "OD"): 
-                print("-  In this new state, the volume derivative is ", next_state["VD"], ", thus because of the proportionality dependency the outflow derivative is as well.")
-        if(next_state["VQ"] == 2):
-                print('-  The volume and outflow quantity have reached their maximum, thus from here on the inflow derivative can not become positive again.')
+    print("In:\n")
+    print(state_to_string(state_id, state))
+    print("The following intrastate changes happen: ")
+    for d in D:
+        if(d == "ID"):
+            if(state[d] == 1):
+                print("-  Inflow derivative is positive in this state (i.e. open the tap more).")
+            if(state[d] == 0):
+                print("-  Inflow derivative is zero so the quantity remains steady (i.e. the tap is not altered again).")
+            if(state[d] == -1): 
+                print("-  Inflow derivative is negative in this state (i.e. tap is closed more)")
+        if(d == "VD"):
+            if(state['IQ'] == 1 and (state["OQ"] == 1 or state["OQ"] == 2)):
+                print("-  Inflow and outflow quantities in this state are both positive so the volume derivative could be anything.")
+                if (state[d] == 0):
+                    print("   In this case it is 0, thus the inflow quantity was equal to the outflow quantity. ")
+                elif(state[d] == 1):
+                    print("   In this case it is 1, thus the inflow quantity was larger than the outflow quantity. ")
+                elif(state[d] == -1):
+                    print("   In this case it is -1, thus the outflow quantity was larger than the inflow quantity. ")
+            if(state['IQ'] == 0 and (state["OQ"] == 1 or state["OQ"] == 2)):
+                print("-  Inflow quantity is 0 while the outflow quantity is positive, thus the volume derivative becomes negative.")
+            if(state['IQ'] == 0 and state["OQ"] == 0):
+                print("-  Inflow and outflow quantities are both 0, thus the volume derivative becomes 0 as well.")
+            if(state['IQ'] == 1 and state["OQ"] == 0):
+                print("-  Inflow quantity is is positive while outflow is 0, thus the volume derivative becomes positive.")
+        if(d == "OD"): 
+            print("-  In this state, the volume derivative is ", state["VD"], ", thus because of the proportionality dependency the outflow derivative is as well.")
+    if(state["VQ"] == 2):
+            print('-  The volume and outflow quantity have reached their maximum, thus from here on the inflow derivative can not become positive again.')
 
 
 
 
-def interstates(states, transition):
-	prev_state = states[transition[0]]
-	next_state = states[transition[1]] 
-	Q = ["IQ", "VQ"]
-	if(prev_state["IQ"] != next_state["IQ"] or prev_state["VQ"] != next_state["VQ"]):
-		print("The following interstate changes happen: ")
-		for q in Q:
-				if(q == "IQ"):
-						if( (prev_state[q] == 0) and (next_state[q] == 1) ):
-							if(prev_state['ID'] == 1):
-								print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the inflow increases because in the previous state the inflow derivative was positive (i.e. tap gets opened more).")
-						if( (prev_state[q] == 1) and (next_state[q] == 0) ):
-							if(prev_state['ID'] == -1):
-								print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the inflow decreases because in the previous state the inflow derivative was negative (i.e. tap closed more).")
-				if(q == "VQ"):
-						if( (prev_state[q] == 0) and (next_state[q] == 1) ):
-							if(prev_state['VD'] == 1):
-								print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the volume increases because in the previous state the volume derivative was positive (i.e. more water coming into the sink).")
-								print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
-								print("   Quantity of the outflow increases because in the previous state the outflow derivative was positive (i.e. more water getting into the drain).")
+def interstates(states, transition, transitions):
+    if(transition not in transitions):
+        print("There is no legal transition between these states.")
+        return
+    prev_state = states[transition[0]]
+    next_state = states[transition[1]] 
+    print("From:\n")
+    print(state_to_string(transition[0], prev_state))
+    print("To:\n")
+    print(state_to_string(transition[1], next_state))
+    Q = ["IQ", "VQ"]
+    if(prev_state["IQ"] != next_state["IQ"] or prev_state["VQ"] != next_state["VQ"]):
+        print("The following interstate changes happen: ")
+        for q in Q:
+                if(q == "IQ"):
+                        if( (prev_state[q] == 0) and (next_state[q] == 1) ):
+                            if(prev_state['ID'] == 1):
+                                print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the inflow increases because in the previous state the inflow derivative was positive (i.e. tap gets opened more).")
+                        if( (prev_state[q] == 1) and (next_state[q] == 0) ):
+                            if(prev_state['ID'] == -1):
+                                print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the inflow decreases because in the previous state the inflow derivative was negative (i.e. tap closed more).")
+                if(q == "VQ"):
+                        if( (prev_state[q] == 0) and (next_state[q] == 1) ):
+                            if(prev_state['VD'] == 1):
+                                print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the volume increases because in the previous state the volume derivative was positive (i.e. more water coming into the sink).")
+                                print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
+                                print("   Quantity of the outflow increases because in the previous state the outflow derivative was positive (i.e. more water getting into the drain).")
 
-						if( (prev_state[q] == 1) and (next_state[q] == 0) ):
-							if(prev_state['VD'] == -1):
-								print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the inflow decreases because in the previous state the inflow derivative was negative (i.e. less water coming into the sink).")
-								print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
-								print("   Quantity of the outflow decreases because in the previous state the outflow derivative was negative (i.e. less water getting into the drain).")
-						if( (prev_state[q] == 1) and (next_state[q] == 2) ):
-							if(prev_state['VD'] == 1):
-								print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the volume reaches its maximum because in the previous state the volume derivative was positive, while the volume quantity was already positive.")
-								print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
-								print("   Quantity of the outflow reaches its maximum because in the previous state the outflow derivative was positive, while the volume quantity was already positive.")
+                        if( (prev_state[q] == 1) and (next_state[q] == 0) ):
+                            if(prev_state['VD'] == -1):
+                                print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the inflow decreases because in the previous state the inflow derivative was negative (i.e. less water coming into the sink).")
+                                print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
+                                print("   Quantity of the outflow decreases because in the previous state the outflow derivative was negative (i.e. less water getting into the drain).")
+                        if( (prev_state[q] == 1) and (next_state[q] == 2) ):
+                            if(prev_state['VD'] == 1):
+                                print("- ", q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the volume reaches its maximum because in the previous state the volume derivative was positive, while the volume quantity was already positive.")
+                                print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
+                                print("   Quantity of the outflow reaches its maximum because in the previous state the outflow derivative was positive, while the volume quantity was already positive.")
                
-						if( (prev_state[q] == 2) and (next_state[q] == 1) ):
-							if(prev_state['VD'] == -1):
-								print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-								print("   Quantity of the inflow is not at its maximum anymore because in the previous state the inflow derivative was negative.")
-								print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
-								print("   Quantity of the outflow is not at its maximum anymore because in the previous state the outflow derivative was negative.")
+                        if( (prev_state[q] == 2) and (next_state[q] == 1) ):
+                            if(prev_state['VD'] == -1):
+                                print('- ', q, "changes from: ", prev_state[q], ' to: ', next_state[q])
+                                print("   Quantity of the inflow is not at its maximum anymore because in the previous state the inflow derivative was negative.")
+                                print("- ", "OQ", "changes from: ", prev_state["OQ"], ' to: ', next_state["OQ"])
+                                print("   Quantity of the outflow is not at its maximum anymore because in the previous state the outflow derivative was negative.")
 
-	else:
-	
-
-		print("Quantities do not change between these states.")
-
-def trace_interstates(states, transitions):
-	Q = ["ID", "IQ", "VD", "VQ", "OD", "OQ"] 
-
-	for i in transitions: 
-		prev_state = states[i[0]]
-		next_state = states[i[1]] 
-		print("State: ", prev_state, " transitions into ", next_state)
-		print("The following changes happen: ")
-		for q in Q:
-			if[prev_state[q] != next_state[q]]:
-				print(q, "changes from: ", prev_state[q], ' to: ', next_state[q])
-				if(q == "ID"):
-					if( prev_state[q] == 0 and next_state[q] == -1 ):
-						print(" - Tap gets closed more.")
-					if( prev_state[q] == 0 and next_state[q] == 1 ):
-						print(" - Tap gets opened more.")
-					if( (prev_state[q] == -1) and (next_state[q] == 0) ):
-						print("- Stop closing the tap.")
-					if( (prev_state[q] == 1) and (next_state[q] == 0) ):
-						print("- Stop opening the tap.")
-				if(q == "IQ"):
-					if( (prev_state[q] == 0) and (next_state[q] == 1) ):
-						print(" - Quantity of the inflow increases.")
-					if( (prev_state[q] == 1) and (next_state[q] == 0) ):
-						print(" - Quantity of the inflow decreases.")
-				if(q == "VD"):
-					if( prev_state[q] == 0 and next_state[q] == -1 ):
-						print(" - Inflow to the container, and thus also the outflow, relatively decreases.")
-					if( ((prev_state[q] == -1) or (prev_state[q] == 1))  and (next_state[q] == 0) ):
-						print("- Inflow to container becomes steady.")
-					if( prev_state[q] == 0 and next_state[q] == 1 ):
-						print(" - Inflow to the container, and thus also the outflow, relatively increases.")
-				if(q == "vQ"):
-					if( (prev_state[q] == 0) and (next_state[q] == 1) ):
-						print(" - Quantity of the inflow increases.")
-					if( (prev_state[q] == 1) and (next_state[q] == 0) ):
-						print(" - Quantity of the inflow decreases.")
-
-
+    else:
+        print("Quantities do not change between these states.")
 
 
 def main():
@@ -408,6 +369,8 @@ def main():
     print('Number of states:',len(states))
     transitions = get_transitions(states)
     create_graph(states, transitions)
+    interstates(states, (22,23), transitions)
+    intrastate(states, 12)
 
 
 
