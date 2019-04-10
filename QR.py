@@ -27,7 +27,7 @@ def next_iq(params):
         possible = [1]
     if params['ID'] == -1:
         if params['IQ'] == 1:
-            possible = possible + [0,1]
+            possible = [0,1]
         if params['IQ'] == 0:
             possible = [0]
     
@@ -269,7 +269,7 @@ def create_graph(states, transitions):
         dot.edge(str(t[0]), str(t[1]))
 
     
-    dot.render('test-output/container')
+    dot.render('output/container')
     return 
 
 def intrastate(states, state_id):
@@ -366,10 +366,11 @@ def interstates(states, transition, transitions):
 
 def main():
     states = get_states()
-    print('Number of states:',len(states))
     transitions = get_transitions(states)
     create_graph(states, transitions)
-    interstates(states, (22,23), transitions)
+    print('Number of states:',len(states))
+    print('Number of transitions:',len(transitions))
+    interstates(states, (23,21), transitions)
     intrastate(states, 12)
 
 
